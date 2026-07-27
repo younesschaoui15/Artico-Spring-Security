@@ -1,13 +1,16 @@
 package com.chaoui.artico.service;
 
+import com.chaoui.artico.dto.request.ArticleDTO;
 import com.chaoui.artico.entity.Article;
+import com.chaoui.artico.entity.Author;
+import com.chaoui.artico.enums.ArticleStatus;
 import com.chaoui.artico.repository.ArticleRepository;
+import com.chaoui.artico.repository.AuthorRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -15,9 +18,11 @@ import java.util.List;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final AuthorRepository authorRepository;
 
-    public ArticleService(ArticleRepository articleRepository) {
+    public ArticleService(ArticleRepository articleRepository, AuthorRepository authorRepository) {
         this.articleRepository = articleRepository;
+        this.authorRepository = authorRepository;
     }
 
 
@@ -37,9 +42,32 @@ public class ArticleService {
                 .orElseThrow(() -> new EntityNotFoundException("Article not found with id " + id));
     }
 
-    public Article createArticle(Article article) {
+    public ArticleDTO createArticle(ArticleDTO article) {
         article.setId(null);
-        return articleRepository.save(article);
+
+        if (article.getAuthorID() == null) {
+            throw new IllegalArgumentException("Author id is required to create an article");
+        }
+
+        var authorId = article.getAuthorID();
+
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new EntityNotFoundException("Author not found with id " + authorId));
+
+        Article articleEntity = new Article();
+        articleEntity.setTitle(article.getTitle());
+        articleEntity.setCategory(article.getCategory());
+        articleEntity.setContent(article.getContent());
+        articleEntity.setArticleStatus(article.getStatus());
+        articleEntity.setAuthor(author);
+
+        try {
+            var newArticle = articleRepository.save(articleEntity);
+            article.setId(newArticle.getId());
+            return article;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Article updateArticle(Long id, Article article) {
@@ -59,5 +87,25 @@ public class ArticleService {
             throw new EntityNotFoundException("Article not found with id " + id);
         }
         articleRepository.deleteById(id);
+    }
+
+    public void hideArticle(Long id, boolean hidden) {
+        Article article = getArticleById(id);
+
+        if(article != null) {
+            try {
+                if (hidden && article.getArticleStatus() != ArticleStatus.PRIVATE)
+                    article.setArticleStatus(ArticleStatus.PRIVATE);
+                else if(!hidden && article.getArticleStatus() == ArticleStatus.PRIVATE)
+                    article.setArticleStatus(ArticleStatus.ON_PROGRESS);
+
+                articleRepository.save(article);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new EntityNotFoundException("Article not found with id " + id);
+        }
+
     }
 }

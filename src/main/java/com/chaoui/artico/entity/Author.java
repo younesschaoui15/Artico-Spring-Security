@@ -20,4 +20,12 @@ public class Author extends User {
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Article> articles = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "Author{" +
+                super.toString() +
+                ", nickname='" + nickname + '\'' +
+                '}';
+    }
 }

@@ -1,12 +1,17 @@
 package com.chaoui.artico.controller;
 
 import com.chaoui.artico.dto.request.CredentialsDTO;
+import com.chaoui.artico.dto.request.RegisterAuthorDTO;
+import com.chaoui.artico.dto.request.RegisterModeratorDTO;
 import com.chaoui.artico.entity.Credentials;
 import com.chaoui.artico.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
@@ -22,9 +27,24 @@ public class AuthController {
     }
 
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestParam String username, @RequestParam String password) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    @PostMapping("/register/author")
+    public ResponseEntity<String> register(@RequestBody RegisterAuthorDTO registerAuthorDTO) {
+        try {
+            authService.registerAuthor(registerAuthorDTO);
+            return ResponseEntity.ok("Author registered successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error registering author: "+ e.getMessage());
+        }
+    }
+
+    @PostMapping("/register/moderator")
+    public ResponseEntity<String> register(@RequestBody RegisterModeratorDTO registerModeratorDTO) {
+        try {
+            authService.registerModerator(registerModeratorDTO);
+            return ResponseEntity.ok("Moderator registered successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error registering moderator: "+ e.getMessage());
+        }
     }
 
     @PostMapping("/login")

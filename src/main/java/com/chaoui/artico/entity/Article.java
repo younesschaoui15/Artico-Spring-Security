@@ -1,5 +1,6 @@
 package com.chaoui.artico.entity;
 
+import com.chaoui.artico.enums.ArticleCategory;
 import com.chaoui.artico.enums.ArticleStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,8 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private ArticleCategory category = ArticleCategory.GENERAL;
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
