@@ -25,7 +25,6 @@ public class ArticleService {
         this.authorRepository = authorRepository;
     }
 
-
     public List<Article> getAllArticles() {
         return articleRepository.findAll();
     }
