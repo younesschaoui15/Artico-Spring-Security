@@ -1,10 +1,9 @@
 package com.chaoui.artico.controller;
 
-import com.chaoui.artico.entity.Author;
 import com.chaoui.artico.entity.Moderator;
-import com.chaoui.artico.service.AuthorService;
 import com.chaoui.artico.service.ModeratorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +23,8 @@ public class ModeratorController {
     }
 
     @GetMapping("/")
-    public List<Moderator> getModerators() {
-        return moderatorService.getAllModerators();
+    public ResponseEntity<List<Moderator>> getModerators() {
+        return ResponseEntity.ok(moderatorService.getAllModerators());
     }
 
     @GetMapping("/{id}")
