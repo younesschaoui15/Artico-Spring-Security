@@ -1,5 +1,6 @@
 package com.chaoui.artico.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,11 +15,12 @@ import java.util.List;
 
 @Entity
 @Data @NoArgsConstructor @AllArgsConstructor @EqualsAndHashCode(callSuper = true)
-public class Author extends User {
+public non-sealed class Author extends User {
 
     private String nickname;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Article> articles = new ArrayList<>();
 
     @Override

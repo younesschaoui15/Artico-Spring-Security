@@ -1,13 +1,15 @@
 package com.chaoui.artico.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 
 @Entity
 @Data @NoArgsConstructor @AllArgsConstructor @EqualsAndHashCode(callSuper = true)
-public class Moderator extends User {
+public non-sealed class Moderator extends User {
 
     private String publicUsername;
     private boolean visible = true;

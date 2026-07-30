@@ -2,10 +2,13 @@ package com.chaoui.artico.entity;
 
 import com.chaoui.artico.enums.ArticleCategory;
 import com.chaoui.artico.enums.ArticleStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "Article")
@@ -20,7 +23,7 @@ public class Article {
     private String title;
     @Enumerated(EnumType.STRING)
     private ArticleCategory category = ArticleCategory.GENERAL;
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(columnDefinition = "TEXT")
     private String content;
     @Enumerated(EnumType.STRING)
@@ -28,6 +31,7 @@ public class Article {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
+    @JsonIgnore
     private Author author;
 
 }

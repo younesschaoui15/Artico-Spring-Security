@@ -1,20 +1,19 @@
 package com.chaoui.artico.entity;
 
 import com.chaoui.artico.enums.UserStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Data @NoArgsConstructor @AllArgsConstructor
-public abstract class User {
+public sealed abstract class User permits Author, Moderator {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
@@ -34,6 +33,7 @@ public abstract class User {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonIgnore
     private Set<UserRole> roles = new HashSet<>();
 
 }

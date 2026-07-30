@@ -16,4 +16,12 @@ public class UserRole {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @PrePersist
+    @PreUpdate
+    private void normalizeName() {
+        if (name != null && !name.toUpperCase().startsWith("ROLE_")) {
+            name = "ROLE_" + name.toUpperCase();
+        }
+    }
+
 }
