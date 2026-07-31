@@ -1,6 +1,7 @@
 package com.chaoui.artico.service;
 
-import com.chaoui.artico.dto.request.ArticleDTO;
+import com.chaoui.artico.dto.request.ArticleDTORequest;
+import com.chaoui.artico.dto.response.ArticleDTOResponse;
 import com.chaoui.artico.entity.Article;
 import com.chaoui.artico.entity.Author;
 import com.chaoui.artico.enums.ArticleStatus;
@@ -41,29 +42,27 @@ public class ArticleService {
                 .orElseThrow(() -> new EntityNotFoundException("Article not found with id " + id));
     }
 
-    public ArticleDTO createArticle(ArticleDTO article) {
-        article.setId(null);
+    public ArticleDTOResponse createArticle(ArticleDTORequest articleDTORequest) {
 
-        if (article.getAuthorID() == null) {
-            throw new IllegalArgumentException("Author id is required to create an article");
+        if (articleDTORequest.getAuthorID() == null) {
+            throw new IllegalArgumentException("Author id is required to create an articleDTORequest");
         }
 
-        var authorId = article.getAuthorID();
+        var authorId = articleDTORequest.getAuthorID();
 
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new EntityNotFoundException("Author not found with id " + authorId));
 
-        Article articleEntity = new Article();
-        articleEntity.setTitle(article.getTitle());
-        articleEntity.setCategory(article.getCategory());
-        articleEntity.setContent(article.getContent());
-        articleEntity.setArticleStatus(article.getStatus());
+        Article articleEntity = articleDTORequest.mapToEntity();
         articleEntity.setAuthor(author);
+
 
         try {
             var newArticle = articleRepository.save(articleEntity);
-            article.setId(newArticle.getId());
-            return article;
+            ArticleDTOResponse response = new ArticleDTOResponse();
+            response.mapFromEntity(newArticle);
+
+            return response;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

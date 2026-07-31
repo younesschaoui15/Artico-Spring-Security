@@ -1,15 +1,15 @@
 package com.chaoui.artico.service;
 
-import com.chaoui.artico.dto.request.CredentialsDTO;
-import com.chaoui.artico.dto.request.ModeratorDTORequest;
-import com.chaoui.artico.dto.request.UserRolesDTO;
+import com.chaoui.artico.dto.UserDTO;
+import com.chaoui.artico.dto.request.*;
+import com.chaoui.artico.dto.response.AdminDTOResponse;
 import com.chaoui.artico.dto.response.ModeratorDTOResponse;
 import com.chaoui.artico.entity.Credentials;
-import com.chaoui.artico.entity.Moderator;
 import com.chaoui.artico.entity.User;
 import com.chaoui.artico.repository.AuthRepository;
 import com.chaoui.artico.repository.RoleRepository;
 import com.chaoui.artico.repository.UserRepository;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +32,51 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public AdminDTOResponse addAdmin(RegisterAdminDTORequest registerAdminDTORequest) {
+        CredentialsDTORequest credentialsDTORequest = registerAdminDTORequest.credentialsDTO();
+        AdminDTORequest adminDTORequest = registerAdminDTORequest.adminDTORequest();
+
+        User savedUser = saveUserAndCredentials(adminDTORequest, credentialsDTORequest);
+        AdminDTOResponse response = new AdminDTOResponse();
+        response.mapFromEntity(savedUser);
+
+        return response;
+    }
+
+    @Transactional
+    public ModeratorDTOResponse addModerator(RegisterModeratorDTORequest newModeratorDTORequest) {
+        CredentialsDTORequest credentialsDTORequest = newModeratorDTORequest.credentialsDTO();
+        ModeratorDTORequest moderatorDTORequest = newModeratorDTORequest.moderatorDTORequest();
+
+        User savedUser = saveUserAndCredentials(moderatorDTORequest, credentialsDTORequest);
+        ModeratorDTOResponse response = new ModeratorDTOResponse();
+        response.mapFromEntity(savedUser);
+
+        return response;
+    }
+
+    private @NonNull User saveUserAndCredentials(UserDTO userDTORequest, CredentialsDTORequest credentialsDTORequest) {
+        if (authRepository.findByUsername(credentialsDTORequest.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already taken: " + credentialsDTORequest.getUsername());
+        } else {
+            User user = userDTORequest.mapToEntity();
+
+            // Save user
+            User savedUser = userRepository.save(user);
+
+            // Create credentials
+            Credentials credentials = credentialsDTORequest.mapToEntity();
+            credentials.setPasswordHash(passwordEncoder.encode(credentialsDTORequest.getPassword()));
+            credentials.setUser(savedUser);
+            credentials = authRepository.save(credentials);
+
+            // Assign roles to user
+            affectRolesToUser(new UserRolesDTO(savedUser.getId(), userDTORequest.getRoles()));
+
+            return savedUser;
+        }
+    }
+
     public void affectRolesToUser(UserRolesDTO userRolesDTO) {
         userRepository.findById(userRolesDTO.userId())
                 .ifPresentOrElse(user -> {
@@ -47,45 +92,5 @@ public class UserService {
                 }, () -> {
                     throw new RuntimeException("User not found!");
                 });
-    }
-
-    @Transactional
-    public ModeratorDTOResponse addModerator(ModeratorDTORequest moderatorDTO, CredentialsDTO credentialsDTO) {
-        if (authRepository.findByUsername(credentialsDTO.username()).isPresent()) {
-            throw new IllegalArgumentException("Username already taken: " + credentialsDTO.username());
-        } else {
-            Moderator moderator = new Moderator();
-            moderator.setFirstName(moderatorDTO.firstName());
-            moderator.setLastName(moderatorDTO.lastName());
-            moderator.setEmail(moderatorDTO.email());
-            moderator.setPublicUsername(moderatorDTO.publicUsername());
-            moderator.setStatus(moderatorDTO.status());
-            moderator.setPublicUsername(moderatorDTO.publicUsername());
-            moderator.setVisible(moderatorDTO.visible());
-
-            // Save moderator
-            Moderator savedModerator = userRepository.save(moderator);
-
-            // Create credentials
-            createCredentials(credentialsDTO.username(), credentialsDTO.password(), savedModerator);
-
-            // Assign roles to user
-            affectRolesToUser(new UserRolesDTO(savedModerator.getId(), moderatorDTO.roles()));
-
-            // Create response
-            ModeratorDTOResponse response = new ModeratorDTOResponse(moderatorDTO);
-            response.setId(savedModerator.getId());
-
-            return response;
-        }
-    }
-
-    private Credentials createCredentials(String username, String password, User user) {
-        Credentials credentials = new Credentials();
-        credentials.setUsername(username);
-        credentials.setPassword(passwordEncoder.encode(password));
-        credentials.setUser(user);
-
-        return authRepository.save(credentials);
     }
 }
