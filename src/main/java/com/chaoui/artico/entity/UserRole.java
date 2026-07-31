@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "role")
-@Data @AllArgsConstructor @NoArgsConstructor
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserRole {
 
     @Id
@@ -16,6 +18,7 @@ public class UserRole {
     @Column(nullable = false, unique = true)
     private String name;
 
+    // Normalize the "name" field before "save" and "update"
     @PrePersist
     @PreUpdate
     private void normalizeName() {

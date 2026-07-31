@@ -1,6 +1,9 @@
 package com.chaoui.artico.entity;
 
+import com.chaoui.artico.enums.AdminLevel;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -12,17 +15,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Moderator extends User {
+public class Admin extends User {
 
-    private String publicUsername;
-    private boolean visible = true;
+    @Enumerated(EnumType.STRING)
+    private AdminLevel level;
+    private Long createdBy; //Other super Admin ID
 
     @Override
     public String toString() {
-        return "Moderator{" +
+        return "Admin {" +
                 super.toString() +
-                ", publicUsername='" + publicUsername + '\'' +
-                ", visible=" + visible +
+                ", level =' " + level + '\'' +
+                ", created by = " + createdBy +
                 "} ";
     }
 }

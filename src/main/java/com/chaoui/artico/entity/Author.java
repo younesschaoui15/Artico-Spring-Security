@@ -14,8 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data @NoArgsConstructor @AllArgsConstructor @EqualsAndHashCode(callSuper = true)
-public non-sealed class Author extends User {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
+public class Author extends User {
 
     private String nickname;
 
