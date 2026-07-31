@@ -1,22 +1,34 @@
 package com.chaoui.artico.dto.response;
 
-import com.chaoui.artico.dto.request.ModeratorDTORequest;
+import com.chaoui.artico.dto.ModeratorDTO;
+import com.chaoui.artico.entity.Moderator;
+import com.chaoui.artico.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data @AllArgsConstructor @NoArgsConstructor
-public class ModeratorDTOResponse extends UserDTOResponse {
-    private String publicUsername;
-    private Boolean visible;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ModeratorDTOResponse extends ModeratorDTO {
 
-    public ModeratorDTOResponse(ModeratorDTORequest request) {
-        this.firstName = request.firstName();
-        this.lastName = request.lastName();
-        this.email = request.email();
-        this.status = request.status();
-        this.publicUsername = request.publicUsername();
-        this.visible = request.visible();
-        this.roles = request.roles();
+    private Long id;
+
+    @Override
+    public void mapFromEntity(User entity) {
+        Moderator moderator = (Moderator) entity;
+        super.mapFromEntity(moderator);
+
+        id = moderator.getId();
+    }
+
+    @Override
+    public Moderator mapToEntity() {
+        Moderator moderator = super.mapToEntity();
+
+        if (id != null)
+            moderator.setId(id);
+
+        return moderator;
     }
 }

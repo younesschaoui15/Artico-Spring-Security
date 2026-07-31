@@ -1,4 +1,15 @@
 package com.chaoui.artico.dto.request;
 
-public record LoginDTORequest(String username, String email, String password) {
+import com.chaoui.artico.dto.LoginDTO;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class LoginDTORequest extends LoginDTO {
+
+    private String email;
+
 }

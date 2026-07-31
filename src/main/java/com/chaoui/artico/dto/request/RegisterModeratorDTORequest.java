@@ -1,7 +1,7 @@
 package com.chaoui.artico.dto.request;
 
-public record NewModeratorDTO(
+public record RegisterModeratorDTORequest(
         ModeratorDTORequest moderatorDTORequest,
-        CredentialsDTO credentialsDTO
+        CredentialsDTORequest credentialsDTO
 ) {
 }

@@ -1,4 +1,4 @@
-package com.chaoui.artico.dto.request;
+package com.chaoui.artico.dto;
 
 public record RoleDTO(String name) {
 }
