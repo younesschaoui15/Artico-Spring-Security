@@ -1,6 +1,7 @@
 package com.chaoui.artico.controller;
 
-import com.chaoui.artico.dto.request.ArticleDTO;
+import com.chaoui.artico.dto.request.ArticleDTORequest;
+import com.chaoui.artico.dto.response.ArticleDTOResponse;
 import com.chaoui.artico.entity.Article;
 import com.chaoui.artico.service.ArticleService;
 import jakarta.annotation.Nullable;
@@ -47,9 +48,9 @@ public class ArticleController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ArticleDTO> createArticle(@RequestBody ArticleDTO article) {
+    public ResponseEntity<ArticleDTOResponse> createArticle(@RequestBody ArticleDTORequest article) {
         try {
-            ArticleDTO created = articleService.createArticle(article);
+            ArticleDTOResponse created = articleService.createArticle(article);
             return new ResponseEntity<>(created, HttpStatus.CREATED);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();

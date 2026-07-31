@@ -1,9 +1,6 @@
 package com.chaoui.artico.controller;
 
 import com.chaoui.artico.dto.request.LoginDTORequest;
-import com.chaoui.artico.dto.request.RegisterAuthorDTO;
-import com.chaoui.artico.dto.request.RegisterModeratorDTO;
-import com.chaoui.artico.entity.Credentials;
 import com.chaoui.artico.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,26 +40,6 @@ public class AuthController {
 //            return new ResponseEntity<>("Login OK", HttpStatus.OK);
 //        } else
 //            return new ResponseEntity<>("Login fails, user does not exist!", HttpStatus.NOT_FOUND);
-    }
-
-    @PostMapping("/register/author")
-    public ResponseEntity<String> register(@RequestBody RegisterAuthorDTO registerAuthorDTO) {
-        try {
-            Credentials credentials = authService.registerAuthor(registerAuthorDTO);
-            return ResponseEntity.ok("Author with username: "+ credentials.getUsername() +" registered successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error registering author: "+ e.getMessage());
-        }
-    }
-
-    @PostMapping("/register/moderator")
-    public ResponseEntity<String> register(@RequestBody RegisterModeratorDTO registerModeratorDTO) {
-        try {
-            Credentials credentials = authService.registerModerator(registerModeratorDTO);
-            return ResponseEntity.ok("Moderator with username: "+ credentials.getUsername() +" registered successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error registering moderator: "+ e.getMessage());
-        }
     }
 
     @PostMapping("/logout")

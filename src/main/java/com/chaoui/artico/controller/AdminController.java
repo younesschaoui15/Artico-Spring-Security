@@ -1,8 +1,10 @@
 package com.chaoui.artico.controller;
 
-import com.chaoui.artico.dto.request.NewModeratorDTO;
-import com.chaoui.artico.dto.request.RoleDTO;
+import com.chaoui.artico.dto.RoleDTO;
+import com.chaoui.artico.dto.request.RegisterAdminDTORequest;
+import com.chaoui.artico.dto.request.RegisterModeratorDTORequest;
 import com.chaoui.artico.dto.request.UserRolesDTO;
+import com.chaoui.artico.dto.response.AdminDTOResponse;
 import com.chaoui.artico.dto.response.ModeratorDTOResponse;
 import com.chaoui.artico.entity.UserRole;
 import com.chaoui.artico.service.RoleService;
@@ -31,10 +33,35 @@ public class AdminController {
         return "Test OK";
     }
 
-    @PostMapping("/new-mod")
-    public ResponseEntity<ModeratorDTOResponse> addModerator(@RequestBody @NonNull NewModeratorDTO newModeratorDTO) {
-        return ResponseEntity.ok(userService.addModerator(newModeratorDTO.moderatorDTORequest(), newModeratorDTO.credentialsDTO()));
+    @PostMapping("/new-admin")
+    public ResponseEntity<AdminDTOResponse> addAdmin(@RequestBody @NonNull RegisterAdminDTORequest adminDTORequest) {
+        return ResponseEntity.ok(userService.addAdmin(adminDTORequest));
     }
+
+    @PostMapping("/new-mod")
+    public ResponseEntity<ModeratorDTOResponse> addModerator(@RequestBody @NonNull RegisterModeratorDTORequest moderatorDTORequest) {
+        return ResponseEntity.ok(userService.addModerator(moderatorDTORequest));
+    }
+
+//    @PostMapping("/register/author")
+//    public ResponseEntity<String> register(@RequestBody AuthorDTORequest registerAuthorDTO) {
+//        try {
+//            Credentials credentials = authService.registerAuthor(registerAuthorDTO);
+//            return ResponseEntity.ok("Author with username: "+ credentials.getUsername() +" registered successfully");
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body("Error registering author: "+ e.getMessage());
+//        }
+//    }
+//
+//    @PostMapping("/register/moderator")
+//    public ResponseEntity<String> register(@RequestBody RegisterModeratorDTO registerModeratorDTO) {
+//        try {
+//            Credentials credentials = authService.registerModerator(registerModeratorDTO);
+//            return ResponseEntity.ok("Moderator with username: "+ credentials.getUsername() +" registered successfully");
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().body("Error registering moderator: "+ e.getMessage());
+//        }
+//    }
 
     @PostMapping("/add-role")
     public ResponseEntity<UserRole> addRole(@RequestBody RoleDTO role) {
