@@ -19,12 +19,13 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+
     private final AuthRepository authRepository;
     private final AuthorRepository authorRepository;
     private final ModeratorRepository moderatorRepository;
     private final UserRoleRepository userRoleRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
 
     public AuthService(AuthRepository authRepository,
                        AuthorRepository authorRepository,

@@ -27,22 +27,22 @@ public class CustomAuthEventListener {
 
         // Update the user's last login date
         authRepository.findByUsername(username)
-                .or(() -> authRepository.findByUserEmail(username))
-                .ifPresent(credentials -> {
-                    credentials.setLastLogin(LocalDateTime.now());
-                    authRepository.save(credentials);
-                });
+            .or(() -> authRepository.findByUserEmail(username))
+            .ifPresent(credentials -> {
+                credentials.setLastLogin(LocalDateTime.now());
+                authRepository.save(credentials);
+            });
 
         System.out.println("""
-                # Authentication Success Event:
-                    Username : %s
-                    Authenticated : %s
-                    Authorities : %s
-                    Last login : %s
-                """.formatted(username,
-                authentication.isAuthenticated(),
-                authentication.getAuthorities(),
-                LocalDateTime.now()));
+            # Authentication Success Event:
+                Username : %s
+                Authenticated : %s
+                Authorities : %s
+                Last login : %s
+            """.formatted(username,
+            authentication.isAuthenticated(),
+            authentication.getAuthorities(),
+            LocalDateTime.now()));
     }
 
     @EventListener
@@ -51,9 +51,9 @@ public class CustomAuthEventListener {
         var authenticated = failureEvent.getAuthentication().isAuthenticated();
 
         System.out.println("""
-                # Authentication Failure Event:
-                    username : %s
-                    authenticated : %s
-                """.formatted(username, authenticated));
+            # Authentication Failure Event:
+                username : %s
+                authenticated : %s
+            """.formatted(username, authenticated));
     }
 }

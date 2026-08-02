@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,20 +26,28 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
-        Credentials credentials = authRepository.findByUsername(username).orElseGet(() -> authRepository.findByUserEmail(username).orElseThrow(() -> new UsernameNotFoundException("User does not exist with username/email: " + username)));
+        Credentials credentials = authRepository.findByUsername(username)
+            .orElseGet(() -> authRepository.findByUserEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User does not exist with username/email: " + username)));
 
         // Get user roles from the database
-        List<SimpleGrantedAuthority> authorities = credentials.getUser().getRoles().stream().map((role) -> new SimpleGrantedAuthority(role.getName())).toList();
+        List<SimpleGrantedAuthority> authorities = credentials.getUser().getRoles()
+            .stream().map((role) -> new SimpleGrantedAuthority(role.getName())).toList();
 
         var isEnabled = credentials.getUser().getStatus() == UserStatus.ACTIVE;
 
-        UserDetails userDetails = new CustomUserDetails(credentials.getUsername(), credentials.getPasswordHash(), authorities, null, isEnabled);
+        UserDetails userDetails = new CustomUserDetails(
+            credentials.getUsername(),
+            credentials.getPasswordHash(),
+            authorities,
+            LocalDateTime.now(),
+            isEnabled);
 
         System.out.println("""
-                # User Loaded Successfully
-                    - Username : %s
-                    - Authorities : %s
-                """.formatted(userDetails.getUsername(), authorities));
+            # User Loaded Successfully
+                - Username : %s
+                - Authorities : %s
+            """.formatted(userDetails.getUsername(), authorities));
 
         return userDetails;
     }
