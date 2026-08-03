@@ -1,73 +1,63 @@
 package com.chaoui.artico.service;
 
-import com.chaoui.artico.dto.request.LoginDTORequest;
-import com.chaoui.artico.entity.Credentials;
-import com.chaoui.artico.entity.User;
-import com.chaoui.artico.repository.AuthRepository;
-import com.chaoui.artico.repository.AuthorRepository;
-import com.chaoui.artico.repository.ModeratorRepository;
-import com.chaoui.artico.repository.UserRoleRepository;
-import org.springframework.http.ResponseEntity;
+import com.chaoui.artico.dto.request.AuthenticationDTORequest;
+import com.chaoui.artico.dto.response.AuthenticationDTOResponse;
+import com.chaoui.artico.security.jwt.JwtService;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
-    private final AuthRepository authRepository;
-    private final AuthorRepository authorRepository;
-    private final ModeratorRepository moderatorRepository;
-    private final UserRoleRepository userRoleRepository;
-
-    public AuthService(AuthRepository authRepository,
-                       AuthorRepository authorRepository,
-                       ModeratorRepository moderatorRepository,
-                       UserRoleRepository userRoleRepository,
-                       PasswordEncoder passwordEncoder,
+    public AuthService(PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       UserDetailsService userDetailsService,
                        AuthenticationManager authenticationManager) {
-        this.authRepository = authRepository;
-        this.authorRepository = authorRepository;
-        this.moderatorRepository = moderatorRepository;
-        this.userRoleRepository = userRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
     }
 
-    public ResponseEntity<String> login(LoginDTORequest cred) {
-        User user = null;
+    public AuthenticationDTOResponse authenticate(AuthenticationDTORequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                request.username(),
+                request.password()
+            )
+        );
 
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(cred.getUsername(), cred.getPassword())
-            );
-            user = authRepository.findByUsername(cred.getUsername()).get().getUser();
-        } catch (AuthenticationException ex) {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(cred.getEmail(), cred.getPassword())
-            );
-            user = authRepository.findByUsername(cred.getEmail()).get().getUser();
-        }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String accessToken = jwtService.generateAccessToken(userDetails);
+        String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-        return ResponseEntity.ok("""
-                Login successful!
-                Welcome, %s
-                """.formatted(user.getFirstName() + " " + user.getLastName()));
+        return new AuthenticationDTOResponse(accessToken, refreshToken);
     }
 
-    public Optional<Credentials> findCredentialsByUsername(String username) {
-        return authRepository.findByUsername(username);
-    }
+    public AuthenticationDTOResponse refreshToken(String refreshToken) {
+        if (refreshToken == null || !jwtService.isRefreshToken(refreshToken))
+            throw new AuthenticationCredentialsNotFoundException("Missing/invalid refresh token");
 
-    public Optional<Credentials> findCredentialsByUserEmailAndPassword(String username, String email) {
-        return authRepository.findByUserEmail(username);
+        String username = jwtService.extractUsername(refreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        if (!jwtService.isTokenValid(refreshToken, userDetails))
+            throw new AuthenticationCredentialsNotFoundException("Refresh token expired");
+
+        String accessToken = jwtService.generateAccessToken(userDetails);
+
+        return new AuthenticationDTOResponse(accessToken, null);
     }
 
 //    @Transactional
