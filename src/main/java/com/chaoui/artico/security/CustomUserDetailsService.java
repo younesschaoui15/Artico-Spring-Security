@@ -1,6 +1,7 @@
 package com.chaoui.artico.security;
 
 import com.chaoui.artico.entity.Credentials;
+import com.chaoui.artico.entity.User;
 import com.chaoui.artico.enums.UserStatus;
 import com.chaoui.artico.repository.AuthRepository;
 import org.jspecify.annotations.NonNull;
@@ -29,12 +30,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         Credentials credentials = authRepository.findByUsername(username)
             .orElseGet(() -> authRepository.findByUserEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User does not exist with username/email: " + username)));
+        User user = credentials.getUser();
 
         // Get user roles from the database
-        List<SimpleGrantedAuthority> authorities = credentials.getUser().getRoles()
+        List<SimpleGrantedAuthority> authorities = user.getRoles()
             .stream().map((role) -> new SimpleGrantedAuthority(role.getName())).toList();
 
-        var isEnabled = credentials.getUser().getStatus() == UserStatus.ACTIVE;
+        var isEnabled = user.getStatus() == UserStatus.ACTIVE;
 
         UserDetails userDetails = new CustomUserDetails(
             credentials.getUsername(),

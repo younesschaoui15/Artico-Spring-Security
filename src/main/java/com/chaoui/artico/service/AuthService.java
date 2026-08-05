@@ -31,6 +31,7 @@ public class AuthService {
     }
 
     public AuthenticationDTOResponse authenticate(AuthenticationDTORequest request) {
+        System.out.println("# request: "+request);
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 request.username(),

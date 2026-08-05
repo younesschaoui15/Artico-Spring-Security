@@ -5,9 +5,13 @@ import com.chaoui.artico.entity.Author;
 import com.chaoui.artico.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data @AllArgsConstructor @NoArgsConstructor
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class AuthorDTOResponse extends AuthorDTO {
 
     private Long id;
@@ -17,7 +21,7 @@ public class AuthorDTOResponse extends AuthorDTO {
         Author author = (Author) entity;
         super.mapFromEntity(author);
 
-        id  = author.getId();
+        id = author.getId();
     }
 
     @Override

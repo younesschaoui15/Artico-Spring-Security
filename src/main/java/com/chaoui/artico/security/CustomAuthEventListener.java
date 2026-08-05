@@ -8,8 +8,6 @@ import org.springframework.security.authentication.event.AuthenticationSuccessEv
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Component
 public class CustomAuthEventListener {
 
@@ -23,26 +21,24 @@ public class CustomAuthEventListener {
     @Transactional
     public void onAuthenticationSuccess(AuthenticationSuccessEvent successEvent) {
         var authentication = successEvent.getAuthentication();
-        String username = authentication.getName();
 
         // Update the user's last login date
-        authRepository.findByUsername(username)
-            .or(() -> authRepository.findByUserEmail(username))
-            .ifPresent(credentials -> {
-                credentials.setLastLogin(LocalDateTime.now());
-                authRepository.save(credentials);
-            });
+//        authRepository.findByUsername(username)
+//            .or(() -> authRepository.findByUserEmail(username))
+//            .ifPresent(credentials -> {
+//                credentials.setLastLogin(LocalDateTime.now());
+//                authRepository.save(credentials);
+//            });
 
         System.out.println("""
-            # Authentication Success Event:
-                Username : %s
+            # Custom Auth Event Listener (Authentication Success):
+                Subject : %s
                 Authenticated : %s
-                Authorities : %s
-                Last login : %s
-            """.formatted(username,
+                Principal : %s
+            """.formatted(
+            authentication.getName(),
             authentication.isAuthenticated(),
-            authentication.getAuthorities(),
-            LocalDateTime.now()));
+            authentication.getPrincipal()));
     }
 
     @EventListener
@@ -51,9 +47,9 @@ public class CustomAuthEventListener {
         var authenticated = failureEvent.getAuthentication().isAuthenticated();
 
         System.out.println("""
-            # Authentication Failure Event:
-                username : %s
-                authenticated : %s
+            # Custom Auth Event Listener (Authentication Failure):
+                Subject : %s
+                Authenticated : %s
             """.formatted(username, authenticated));
     }
 }

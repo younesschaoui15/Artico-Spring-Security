@@ -4,9 +4,13 @@ import com.chaoui.artico.entity.Moderator;
 import com.chaoui.artico.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data @AllArgsConstructor @NoArgsConstructor
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public abstract non-sealed class ModeratorDTO extends UserDTO {
 
     private String publicUsername;

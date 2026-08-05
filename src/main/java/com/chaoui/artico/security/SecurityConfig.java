@@ -20,11 +20,6 @@ public class SecurityConfig {
     @Value("${app.request-mapping.auth}")
     private String authRequestMapping;
 
-    private final CustomJwtAuthenticationFilter customJwtAuthenticationFilter;
-
-    public SecurityConfig(CustomJwtAuthenticationFilter customJwtAuthenticationFilter) {
-        this.customJwtAuthenticationFilter = customJwtAuthenticationFilter;
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
@@ -32,8 +27,7 @@ public class SecurityConfig {
         return http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/public/**", authRequestMapping+"/**").permitAll()
                 .requestMatchers("/actuator/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
@@ -41,6 +35,9 @@ public class SecurityConfig {
             )
             .httpBasic(b -> b.authenticationEntryPoint(customAuthEntryPoint))
 //            .httpBasic(Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(
                 customJwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class)

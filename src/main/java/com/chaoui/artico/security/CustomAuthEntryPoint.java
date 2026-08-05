@@ -20,6 +20,7 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         System.out.println("# [Log]: User Authentication Failed!");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"message\": \"Invalid credentials or token\"}");
+//        response.getWriter().write("{\"message\": \"Invalid Credentials/Token\"}");
+        response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"" + authException.getMessage() + "\"}");
     }
 }

@@ -5,9 +5,13 @@ import com.chaoui.artico.entity.Admin;
 import com.chaoui.artico.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data @AllArgsConstructor @NoArgsConstructor
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class AdminDTOResponse extends AdminDTO {
 
     private Long id;

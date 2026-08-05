@@ -5,11 +5,13 @@ import com.chaoui.artico.entity.User;
 import com.chaoui.artico.enums.AdminLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public abstract non-sealed class AdminDTO extends UserDTO {
 
     private AdminLevel level = AdminLevel.BASIC;

@@ -2,6 +2,7 @@ package com.chaoui.artico.security.jwt;
 
 import com.chaoui.artico.enums.TokenType;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -77,7 +78,6 @@ public class JwtService {
     }
 
     public String extractUsername(String token) {
-        System.out.println("# extractUsername: "+token);
         return extractAllClaims(token).getSubject();
     }
 
@@ -97,13 +97,14 @@ public class JwtService {
 
     public boolean isAccessToken(String token) {
         String tokenType = extractAllClaims(token).get("type", String.class);
+        System.out.println("# Token Type: " + tokenType);
 
         return TokenType.ACCESS.name().equals(tokenType);
     }
 
     public boolean isRefreshToken(String token) {
-        System.out.println("# isRefreshToken: "+token);
         String tokenType = extractAllClaims(token).get("type", String.class);
+        System.out.println("# Token Type: " + tokenType);
 
         return TokenType.REFRESH.name().equals(tokenType);
     }
@@ -113,10 +114,15 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
-        System.out.println("# username : " + username + " - UD username: " + userDetails.getUsername());
+        try {
+            String authUsername = userDetails.getUsername();
+            String requestUsername = extractUsername(token);
+            System.out.println("# Request Username : " + requestUsername + " - Auth Username: " + authUsername);
 
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+            return authUsername.equals(requestUsername) && !isTokenExpired(token);
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public boolean isHeaderFormatValid(String authHeader) {

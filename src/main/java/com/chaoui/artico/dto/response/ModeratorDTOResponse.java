@@ -5,11 +5,13 @@ import com.chaoui.artico.entity.Moderator;
 import com.chaoui.artico.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class ModeratorDTOResponse extends ModeratorDTO {
 
     private Long id;
