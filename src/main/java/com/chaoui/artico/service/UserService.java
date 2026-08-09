@@ -6,13 +6,18 @@ import com.chaoui.artico.dto.response.AdminDTOResponse;
 import com.chaoui.artico.dto.response.ModeratorDTOResponse;
 import com.chaoui.artico.entity.Credentials;
 import com.chaoui.artico.entity.User;
+import com.chaoui.artico.enums.UserStatus;
 import com.chaoui.artico.repository.AuthRepository;
 import com.chaoui.artico.repository.RoleRepository;
 import com.chaoui.artico.repository.UserRepository;
+import jakarta.validation.constraints.NotBlank;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -92,5 +97,21 @@ public class UserService {
                 }, () -> {
                     throw new RuntimeException("User not found!");
                 });
+    }
+
+    public Optional<User> findByEmail(@NotBlank String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public User createNewUser(OidcUser oidcUser) {
+        User user = new User();
+
+        user.setFirstName(oidcUser.getGivenName());
+        user.setLastName(oidcUser.getFamilyName());
+        user.setEmail(oidcUser.getEmail());
+        boolean isEmailVerified = Boolean.TRUE.equals(oidcUser.getEmailVerified());
+        user.setStatus(isEmailVerified ? UserStatus.ACTIVE : UserStatus.INACTIVE);
+
+        return userRepository.save(user);
     }
 }

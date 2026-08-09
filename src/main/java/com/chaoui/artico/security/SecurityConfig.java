@@ -2,6 +2,8 @@ package com.chaoui.artico.security;
 
 import com.chaoui.artico.security.jwt.CustomJwtAuthenticationFilter;
 import com.chaoui.artico.security.jwt.JwtProperties;
+import com.chaoui.artico.security.oauth2.CustomOidcUserService;
+import com.chaoui.artico.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,21 +25,34 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
+                                           CustomJwtAuthenticationFilter customJwtAuthenticationFilter,
+                                           CustomOidcUserService customOidcUserService,
+                                           OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
                                            CustomAuthEntryPoint customAuthEntryPoint) throws Exception {
         return http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/public/**", authRequestMapping+"/**").permitAll()
+                .requestMatchers(
+                    authRequestMapping + "/**",
+                    "/login/**",
+                    "/oauth2/**"
+                ).permitAll()
                 .requestMatchers("/actuator/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated()
             )
-            .httpBasic(b -> b.authenticationEntryPoint(customAuthEntryPoint))
-//            .httpBasic(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .oauth2Login(auth -> auth
+//                .authorizationEndpoint(endpoint -> endpoint
+//                    .authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository())
+//                )
+                .userInfoEndpoint(endPoint -> endPoint
+                    .oidcUserService(customOidcUserService))
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+            )
+            .exceptionHandling(exception ->
+                exception.authenticationEntryPoint(customAuthEntryPoint) // wins over oauth2Login's default (redirection to login page)
+            )
             .addFilterBefore(
                 customJwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class)

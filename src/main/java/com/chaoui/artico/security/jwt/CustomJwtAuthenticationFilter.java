@@ -43,15 +43,15 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        String jwtToken = authHeader.substring(7);
-        String username = jwtService.extractUsername(jwtToken);
+        String accessToken = authHeader.substring(7);
+        String username = jwtService.extractUsername(accessToken);
 
         // if the token is valid (username exists), configure Spring Security to manually set the authentication
         if (username != null && securityContext.getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             // check if the token is valid (not expired, not revoked), then set the authentication
-            if (jwtService.isTokenValid(jwtToken, userDetails)) {
+            if (jwtService.isTokenValid(accessToken, userDetails)) {
                 // create a new authentication token with the user details, then set it in the security context
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     userDetails,
@@ -69,5 +69,15 @@ public class CustomJwtAuthenticationFilter extends OncePerRequestFilter {
 
         // continue with the request chain
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getServletPath();
+
+        return path.startsWith("/oauth2/")
+            || path.startsWith("/login/oauth2/")
+            || path.startsWith("/error");
     }
 }
